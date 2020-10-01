@@ -229,24 +229,24 @@ class User(object):
         """Restore user state."""
         try:
             state = self._state_store.get_value(self._state_store_key)
-            state_dict = pickle.loads(
-                binascii.unhexlify(state.encode("utf-8")))
-            self._name = state_dict['name']
-            self.enrollment_secret = state_dict['enrollment_secret']
-            enrollment = state_dict['enrollment']
-            if enrollment:
-                private_key = serialization.load_pem_private_key(
-                    enrollment['private_key'],
-                    password=None,
-                    backend=default_backend()
-                )
-                cert = enrollment['cert']
-                self.enrollment = Enrollment(private_key, cert)
-            self.affiliation = state_dict['affiliation']
-            self.account = state_dict['account']
-            self.roles = state_dict['roles']
-            self._org = state_dict['org']
-            self.msp_id = state_dict['msp_id']
+            if state:
+                state_dict = pickle.loads(binascii.unhexlify(state.encode("utf-8")))
+                self._name = state_dict['name']
+                self.enrollment_secret = state_dict['enrollment_secret']
+                enrollment = state_dict['enrollment'] if 'enrollment' in state_dict else None
+                if enrollment:
+                    private_key = serialization.load_pem_private_key(
+                        enrollment['private_key'],
+                        password=None,
+                        backend=default_backend()
+                    )
+                    cert = enrollment['cert']
+                    self.enrollment = Enrollment(private_key, cert)
+                self.affiliation = state_dict['affiliation']
+                self.account = state_dict['account']
+                self.roles = state_dict['roles']
+                self._org = state_dict['org']
+                self.msp_id = state_dict['msp_id']
         except Exception as e:
             raise IOError("Cannot deserialize the user", e)
 
